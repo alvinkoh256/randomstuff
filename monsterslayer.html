@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <title>Document</title>
+
+    <!--Bootstrap CSS-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <!--Vue CDN-->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        #yourHealth {
+            background-color: green;
+            width: 100%
+        }
+
+        #monsterHealth {
+            background-color: green;
+            width: 100%
+        }
+
+        /* #monsterHealthParent,
+        #yourHealthParent {
+            background-color: lightgrey;
+            width: 100px;
+        } */
+
+        button {
+            margin-left: 20px;
+            margin-right: 20px;
+            margin-top: 2px;
+            margin-bottom: 2px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div class="container">
+            <div class="row">
+                <div class="col text-center">YOU</div>
+                <div class="col text-center">MONSTER</div>
+            </div>
+            <div class="row">
+                <div class="col text-center">
+                    <div id="yourHealth" :style="{ width: yourHealth + '%' }">{{yourHealth}}</div>
+                </div>
+                <div class="col text-center">
+                    <div id="monsterHealth" :style="{ width: monsterHealth + '%' }">{{monsterHealth}}</div>
+                </div>
+            </div>
+            <div class="row mt-4 mb-4" style="border:1px solid black">
+                <div class="col text-center" v-if="gameContinue == true">
+                    <button @click="attackMonster" style="background-color:red; color:white">Attack</button>
+                    <button @click="superAttackMonster" style="background-color:yellow; color:black">Special
+                        Attack</button>
+                    <button @click="healSelf" style="background-color:red; color:white">Heal</button>
+                    <button @click="giveUp" style="background-color:black; color:red">Give Up</button>
+                </div>
+                <div class="col text-center" v-else="">
+                    <button
+                        @click="gameContinue = true; log = []; log.push('Game Start!'); yourHealth = 100; monsterHealth = 100">Start
+                        Game</button>
+                </div>
+            </div>
+
+            <div class="row" style="border:1px solid black">
+                <div class="col">
+                    <p v-for="x in log">{{x}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        Vue.createApp({
+            data() {
+                return {
+                    gameContinue: false,
+                    yourHealth: 100,
+                    monsterHealth: 100,
+                    log: []
+                }
+            },
+            methods: {
+                attackMonster() {
+                    // attacks monster for < 20 damage and receive attack
+                    let attack = Math.floor(Math.random() * 20);
+
+                    // the following if else statement checks whether the next attack will bring health down to 0, if yes, attack == remaining health.
+                    if ((this.monsterHealth - attack) < 0) {
+                        this.monsterHealth -= this.monsterHealth
+                        this.log.push(`Monster attacked and you suffered ${this.monsterHealth} points`);
+                        this.gameContinue = false;
+                        this.checkWinner();
+                    } else {
+                        this.monsterHealth -= attack;
+                        this.log.push(`You attacked and monster suffered ${attack} points`);
+                        let attack_received = Math.floor(Math.random() * 20);
+                        this.checkWinner();
+
+                        if ((this.yourHealth - attack_received) < 0) {
+                            this.yourHealth -= this.yourHealth
+                            this.log.push(`Monster attacked and you suffered ${this.yourHealth} points`);
+                            this.gameContinue = false;
+                            this.checkWinner();
+                        } else {
+                            this.yourHealth -= attack_received;
+                            this.log.push(`Monster attacked and you suffered ${attack_received} points`);
+                            this.checkWinner();
+                        }
+                    }
+
+
+                },
+                superAttackMonster() {
+                    // attacks monster for < 40 damage and receive attack
+                    let attack = Math.floor(Math.random() * 20 * 2);
+
+                    let attack_received = Math.floor(Math.random() * 20);
+
+                    if ((this.monsterHealth - attack) < 0) {
+                        this.monsterHealth -= this.monsterHealth
+                        this.log.push(`Monster attacked and you suffered ${this.monsterHealth} points`);
+                        this.gameContinue = false;
+                        this.checkWinner();
+
+                    } else {
+                        this.monsterHealth -= attack;
+                        this.log.push(`You attacked and monster suffered ${attack} points`);
+                        if ((this.yourHealth - attack_received) < 0) {
+                            this.yourHealth -= this.yourHealth
+                            this.log.push(`Monster attacked and you suffered ${this.yourHealth} points`);
+                            this.gameContinue = false;
+                            this.checkWinner();
+
+                        } else {
+                            this.yourHealth -= attack_received;
+                            this.log.push(`Monster attacked and you suffered ${attack_received} points`);
+                            this.checkWinner();
+                        }
+                    }
+
+
+                },
+                healSelf() {
+                    // heal self for < 20 health and receive attack
+                    let heal = Math.floor(Math.random() * 20);
+                    if ((this.yourHealth + heal) > 100) {
+                        heal = 100 - this.yourHealth
+                        this.yourHealth += heal;
+                    } else {
+                        this.yourHealth += heal;
+                    }
+                    this.log.push(`You healed ${heal} points`);
+
+                    let attack_received = Math.floor(Math.random() * 20);
+
+                    if ((this.yourHealth - attack_received) < 0) {
+                        this.yourHealth -= this.yourHealth
+                        this.log.push(`Monster attacked and you suffered ${this.yourHealth} points`);
+                        this.gameContinue = false;
+                        this.checkWinner();
+
+                    } else {
+                        this.yourHealth -= attack_received;
+                        this.log.push(`Monster attacked and you suffered ${attack_received} points`);
+                        this.checkWinner();
+                    }
+                },
+                giveUp() {
+                    this.yourHealth = 0;
+                    this.log.push('You gave up!');
+                    this.gameContinue = false;
+                    this.checkWinner();
+                },
+                checkWinner() {
+                    if (this.yourHealth == 0) {
+                        this.log.push("Monster is the winner!");
+                        this.log.push("Game end.");
+                    } else if (this.monsterHealth == 0) {
+                        this.log.push("You are the winner!");
+                        this.log.push("Game end.");
+                    }
+                }
+
+            }
+        }).mount('#app');
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+</body>
+
+</html>
